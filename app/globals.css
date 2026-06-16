@@ -1,0 +1,284 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+/* Corporate Color Palette:
+   Primary Purple: #552373 (brand/primary)
+   Magenta: #B80E80 (accent/secondary)
+   Dark Blue: #263D77 (form elements)
+   Teal: #009BAA (interactive/success)
+*/
+
+:root {
+  --background: oklch(0.98 0.005 285);
+  --foreground: oklch(0.20 0.02 280);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.20 0.02 280);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.20 0.02 280);
+  /* Primary Purple #552373 */
+  --primary: oklch(0.35 0.14 305);
+  --primary-foreground: oklch(0.98 0 0);
+  /* Magenta #B80E80 */
+  --secondary: oklch(0.50 0.20 330);
+  --secondary-foreground: oklch(0.98 0 0);
+  --muted: oklch(0.95 0.01 285);
+  --muted-foreground: oklch(0.45 0.02 280);
+  /* Teal #009BAA */
+  --accent: oklch(0.60 0.12 200);
+  --accent-foreground: oklch(0.98 0 0);
+  --destructive: oklch(0.55 0.22 25);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: oklch(0.90 0.01 285);
+  /* Dark Blue #263D77 */
+  --input: oklch(0.35 0.08 260);
+  --ring: oklch(0.35 0.14 305);
+  /* Chart colors using corporate palette */
+  --chart-1: oklch(0.35 0.14 305);
+  --chart-2: oklch(0.50 0.20 330);
+  --chart-3: oklch(0.35 0.08 260);
+  --chart-4: oklch(0.60 0.12 200);
+  --chart-5: oklch(0.65 0.15 305);
+  --radius: 0.5rem;
+  /* Sidebar with purple theme */
+  --sidebar: oklch(0.30 0.12 305);
+  --sidebar-foreground: oklch(0.95 0.01 285);
+  --sidebar-primary: oklch(0.98 0 0);
+  --sidebar-primary-foreground: oklch(0.30 0.12 305);
+  --sidebar-accent: oklch(0.40 0.14 305);
+  --sidebar-accent-foreground: oklch(0.98 0 0);
+  --sidebar-border: oklch(0.38 0.12 305);
+  --sidebar-ring: oklch(0.60 0.12 200);
+  /* Custom status colors */
+  --status-open: oklch(31.516% 0.21566 264.118);
+  --status-in-progress: oklch(0.70 0.15 85);
+  --status-pending: oklch(0.50 0.20 330);
+  --status-resolved: oklch(40.458% 0.12736 139.546);
+  --status-closed: oklch(63.458% 0.21176 142.944);
+  /* Priority colors */
+  --priority-critical: oklch(0.55 0.22 25);
+  --priority-high: oklch(0.65 0.20 40);
+  --priority-medium: oklch(0.70 0.15 85);
+  --priority-low: oklch(0.60 0.12 200);
+}
+
+.dark {
+  --background: oklch(0.18 0.02 280);
+  --foreground: oklch(0.95 0.01 285);
+  --card: oklch(0.22 0.02 280);
+  --card-foreground: oklch(0.95 0.01 285);
+  --popover: oklch(0.22 0.02 280);
+  --popover-foreground: oklch(0.95 0.01 285);
+  --primary: oklch(0.55 0.18 305);
+  --primary-foreground: oklch(0.98 0 0);
+  --secondary: oklch(0.55 0.20 330);
+  --secondary-foreground: oklch(0.98 0 0);
+  --muted: oklch(0.28 0.02 280);
+  --muted-foreground: oklch(0.65 0.02 280);
+  --accent: oklch(0.60 0.12 200);
+  --accent-foreground: oklch(0.98 0 0);
+  --destructive: oklch(0.50 0.20 25);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: oklch(0.32 0.02 280);
+  --input: oklch(0.40 0.08 260);
+  --ring: oklch(0.55 0.18 305);
+  --chart-1: oklch(0.55 0.18 305);
+  --chart-2: oklch(0.55 0.20 330);
+  --chart-3: oklch(0.45 0.10 260);
+  --chart-4: oklch(0.60 0.12 200);
+  --chart-5: oklch(0.70 0.15 305);
+  --sidebar: oklch(0.22 0.08 305);
+  --sidebar-foreground: oklch(0.95 0.01 285);
+  --sidebar-primary: oklch(0.55 0.18 305);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent: oklch(0.32 0.10 305);
+  --sidebar-accent-foreground: oklch(0.95 0.01 285);
+  --sidebar-border: oklch(0.35 0.08 305);
+  --sidebar-ring: oklch(0.60 0.12 200);
+}
+
+@theme inline {
+  --font-sans: 'Geist', 'Geist Fallback', system-ui, sans-serif;
+  --font-mono: 'Geist Mono', 'Geist Mono Fallback', monospace;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  /* Custom colors */
+  --color-status-open: var(--status-open);
+  --color-status-in-progress: var(--status-in-progress);
+  --color-status-pending: var(--status-pending);
+  --color-status-resolved: var(--status-resolved);
+  --color-status-closed: var(--status-closed);
+  --color-priority-critical: var(--priority-critical);
+  --color-priority-high: var(--priority-high);
+  --color-priority-medium: var(--priority-medium);
+  --color-priority-low: var(--priority-low);
+}
+
+/* Theme Switch — from Uiverse.io by JustCode14 */
+.switch {
+  font-size: 17px;
+  position: relative;
+  display: inline-block;
+  width: 4em;
+  height: 2.2em;
+  border-radius: 30px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #2a2a2a;
+  transition: 0.4s;
+  border-radius: 30px;
+  overflow: hidden;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 1.2em;
+  width: 1.2em;
+  border-radius: 20px;
+  left: 0.5em;
+  bottom: 0.5em;
+  transition: 0.4s;
+  transition-timing-function: cubic-bezier(0.81, -0.04, 0.38, 1.5);
+  box-shadow: inset 8px -4px 0px 0px #fff;
+}
+
+.switch input:checked + .slider {
+  background-color: #00a6ff;
+}
+
+.switch input:checked + .slider:before {
+  transform: translateX(1.8em);
+  box-shadow: inset 15px -4px 0px 15px #ffcf48;
+}
+
+.star {
+  background-color: #fff;
+  border-radius: 50%;
+  position: absolute;
+  width: 5px;
+  transition: all 0.4s;
+  height: 5px;
+}
+
+.star_1 {
+  left: 2.5em;
+  top: 0.5em;
+}
+
+.star_2 {
+  left: 2.2em;
+  top: 1.2em;
+}
+
+.star_3 {
+  left: 3em;
+  top: 0.9em;
+}
+
+.switch input:checked ~ .slider .star {
+  opacity: 0;
+}
+
+.cloud {
+  width: 3.5em;
+  position: absolute;
+  bottom: -1.4em;
+  left: -1.1em;
+  opacity: 0;
+  transition: all 0.4s;
+}
+
+.switch input:checked ~ .slider .cloud {
+  opacity: 1;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html,
+  body {
+    /* Prevent iOS Safari horizontal page scroll caused by fractional widths. */
+    overflow-x: clip;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Scrollbar styling (modern, subtle, consistent with theme) */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklch, var(--muted-foreground) 45%, transparent)
+    color-mix(in oklch, var(--background) 85%, var(--card));
+}
+
+*::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+*::-webkit-scrollbar-track {
+  background: color-mix(in oklch, var(--background) 85%, var(--card));
+  border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: color-mix(in oklch, var(--muted-foreground) 55%, transparent);
+  border-radius: 999px;
+  border: 3px solid color-mix(in oklch, var(--background) 85%, var(--card));
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in oklch, var(--muted-foreground) 70%, transparent);
+}
