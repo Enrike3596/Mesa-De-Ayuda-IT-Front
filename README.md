@@ -1,35 +1,88 @@
 # Gestor-tks-IT
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [v0](https://v0.app).
+Sistema de gestión de tickets para mesa de ayuda TI desarrollado con **Next.js 16**, **React 19**, **TypeScript** y **Tailwind CSS v4**.
 
-## Built with v0
+## Tecnologías
 
-This repository is linked to a [v0](https://v0.app) project. You can continue developing by visiting the link below -- start new chats to make changes, and v0 will push commits directly to this repo. Every merge to `main` will automatically deploy.
+| Categoría | Tecnologías |
+|---|---|
+| **Framework** | Next.js 16 (App Router), React 19 |
+| **Lenguaje** | TypeScript 5 (strict mode) |
+| **Estilos** | Tailwind CSS v4, shadcn/ui (New York style) |
+| **Autenticación** | JWT con cookie + localStorage |
+| **Tiempo real** | SignalR (Microsoft) |
+| **HTTP** | Axios, SWR |
+| **Formularios** | React Hook Form + Zod |
+| **Gráficos** | Recharts |
+| **Notificaciones** | Sonner |
+| **Fecha** | date-fns |
+| **Iconos** | Lucide React |
+| **Paquete** | pnpm |
 
-[Continue working on v0 →](https://v0.app/chat/projects/prj_wsFXaoU3JrwB36v8dwljymA50v5v)
+## Arquitectura
 
-## Getting Started
+- **Frontend:** Next.js con App Router (`app/`) y componentes servidor/cliente
+- **Backend:** API .NET (configurado via `NEXT_PUBLIC_API_URL`)
+- **Tiempo real:** SignalR hub en `/hubs/ticket`
+- **Roles:** `ADMIN`, `AGENTE_TI`, `USUARIO`
 
-First, run the development server:
+## Requisitos
+
+- Node.js 20+
+- pnpm (recomendado), npm o yarn
+
+## Instalación
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+# Clonar el repositorio
+git clone <repo-url>
+cd Gestor-tks-IT
+
+# Instalar dependencias
+pnpm install
+```
+
+## Configuración
+
+Crear archivo `.env.local` en la raíz:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:5214/api
+```
+
+## Comandos
+
+| Comando | Descripción |
+|---|---|
+| `pnpm dev` | Inicia servidor de desarrollo en `http://localhost:3000` |
+| `pnpm build` | Genera build de producción |
+| `pnpm start` | Inicia servidor de producción |
+| `pnpm lint` | Ejecuta linter (ESLint) |
+
+## Desarrollo
+
+```bash
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abrir [http://localhost:3000](http://localhost:3000) para ver la aplicación.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Estructura
 
-## Learn More
+```
+app/          # Páginas (App Router)
+components/   # Componentes React (ui/, formularios, layout)
+lib/          # Lógica (API, contexto, stores, tipos)
+hooks/        # Custom hooks
+public/       # Archivos estáticos
+```
 
-To learn more, take a look at the following resources:
+## Paleta corporativa
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-- [v0 Documentation](https://v0.app/docs) - learn about v0 and how to use it.
+- Púrpura: `#552373`
+- Magenta: `#B80E80`
+- Azul oscuro: `#263D77`
+- Teal: `#009BAA`
 
-<a href="https://v0.app/chat/api/kiro/clone/Enrike3596/Gestor-tks-IT" alt="Open in Kiro"><img src="https://pdgvvgmkdvyeydso.public.blob.vercel-storage.com/open%20in%20kiro.svg?sanitize=true" /></a>
+---
+
