@@ -30,9 +30,15 @@ export interface Usuario {
   area?: Area
 }
 
+export interface TipoTicket {
+  Id: number
+  Nombre: string
+}
+
 export interface Categoria {
   Id: number
   AreaId: number
+  TipoTicketId: number
   Nombre: string
   Descripcion: string
   Estado: boolean
@@ -66,6 +72,7 @@ export interface Ticket {
   subcategoria_id: number | null
   prioridad_id: number
   area_id: number
+  tipo_ticket_id?: number
   created_at: string
   updated_at: string
   fecha_resolucion: string | null
@@ -158,6 +165,7 @@ export interface Notification {
   tipo: 'TICKET_CREADO' | 'TICKET_ASIGNADO' | 'TICKET_ACTUALIZADO' | 'COMENTARIO_NUEVO'
   mensaje: string
   ticket_id: number
+  usuario_id?: number
   leida: boolean
   created_at: string
 }
@@ -166,6 +174,7 @@ export interface Notification {
 export interface CreateTicketForm {
   titulo: string
   descripcion: string
+  tipo_ticket_id: number
   categoria_id: number
   subcategoria_id: number | null
   prioridad_id: number
@@ -199,6 +208,7 @@ export interface UpdateTicketForm {
   titulo?: string
   descripcion?: string
   estado?: TicketEstado
+  tipo_ticket_id?: number
   categoria_id?: number
   subcategoria_id?: number | null
   prioridad_id?: number
@@ -236,4 +246,9 @@ export interface TkAnexo {
 
 export interface CreateTicketFormWithFiles extends CreateTicketForm {
   archivos?: File[]
+}
+
+export interface TipoTicketInfo {
+  Id: number
+  Nombre: string
 }

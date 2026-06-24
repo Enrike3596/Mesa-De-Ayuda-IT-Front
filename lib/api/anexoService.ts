@@ -2,7 +2,7 @@ import api from './axiosConfig'
 
 import type { TkAnexo } from '@/lib/types'
 
-const BASE = '/tkanexo'
+const BASE = '/TicketAnexo'
 
 export const EXTENSIONES_PERMITIDAS = [
   'png', 'jpg', 'jpeg', 'pdf', 'docx', 'xlsx', 'txt'
@@ -94,20 +94,10 @@ function normalizeAnexo(raw: any): TkAnexo {
 }
 
 export async function listarAnexosPorTicket(ticketId: number): Promise<TkAnexo[]> {
-  // Backend now supports server-side filtering.
-  // Prefer query-string to avoid route casing issues.
-  try {
-    const res = await api.get<any>(`${BASE}?ticketId=${ticketId}`)
-    const raw = res.data
-    const arr = Array.isArray(raw) ? raw : Array.isArray(raw?.data) ? raw.data : []
-    return arr.map(normalizeAnexo)
-  } catch {
-    // Fallback alternative route.
-    const res = await api.get<any>(`${BASE}/ticket/${ticketId}`)
-    const raw = res.data
-    const arr = Array.isArray(raw) ? raw : Array.isArray(raw?.data) ? raw.data : []
-    return arr.map(normalizeAnexo)
-  }
+  const res = await api.get<any>(`${BASE}/ticket/${ticketId}`)
+  const raw = res.data
+  const arr = Array.isArray(raw) ? raw : Array.isArray(raw?.data) ? raw.data : []
+  return arr.map(normalizeAnexo)
 }
 
 function getApiBaseUrl(): string {

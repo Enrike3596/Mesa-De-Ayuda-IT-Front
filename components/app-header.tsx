@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { Bell, LogOut, User, Menu } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -23,6 +24,7 @@ interface AppHeaderProps {
 }
 
 export function AppHeader({ onMenuClick }: AppHeaderProps) {
+  const router = useRouter()
   const { session, logout } = useAuth()
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications()
 
@@ -99,8 +101,11 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
               notifications.slice(0, 5).map(notification => (
                 <DropdownMenuItem
                   key={notification.id}
-                  className="flex flex-col items-start gap-1 p-3"
-                  onClick={() => markAsRead(notification.id)}
+                  className="flex flex-col items-start gap-1 p-3 cursor-pointer"
+                  onClick={() => {
+                    markAsRead(notification.id)
+                    router.push(`/tickets/${notification.ticket_id}`)
+                  }}
                 >
                   <div className="flex w-full items-start justify-between gap-2">
                     <span className={`text-sm ${notification.leida ? 'text-muted-foreground' : 'font-medium'}`}>

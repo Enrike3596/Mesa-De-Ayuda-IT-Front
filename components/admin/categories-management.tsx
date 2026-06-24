@@ -39,7 +39,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import type { Area, Categoria } from '@/lib/types'
+import type { Area, Categoria, TipoTicketInfo } from '@/lib/types'
 import { listarAreas } from '@/lib/api/areaService'
 import {
   actualizarCategoria,
@@ -47,6 +47,7 @@ import {
   eliminarCategoria,
   listarCategorias,
 } from '@/lib/api/categoriaService'
+import { listarTipoTickets } from '@/lib/api/tipoTicketService'
 
 const normalizeEstadoToBoolean = (rawEstado: unknown): boolean => {
   if (typeof rawEstado === 'boolean') return rawEstado
@@ -75,11 +76,13 @@ const extractApiErrorMessage = (error: any): string => {
 export function CategoriesManagement() {
   const [categorias, setCategorias] = useState<Categoria[]>([])
   const [areas, setAreas] = useState<Area[]>([])
+  const [tipoTickets, setTipoTickets] = useState<TipoTicketInfo[]>([])
   
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<Categoria | null>(null)
   const [formData, setFormData] = useState({
     AreaId: 0,
+    TipoTicketId: 0,
     Nombre: '',
     Descripcion: '',
     Estado: true,
@@ -89,9 +92,11 @@ export function CategoriesManagement() {
     let mounted = true
     const load = async () => {
       try {
-        const [areasData, catsData] = await Promise.all([listarAreas(), listarCategorias()])
+        const [areasData, tiposData, catsData] = await Promise.all([listarAreas(), listarTipoTickets(), listarCategorias()])
         if (!mounted) return
-        
+
+        setTipoTickets(Array.isArray(tiposData) ? tiposData : [])
+
         setAreas((Array.isArray(areasData) ? areasData : []).map((a: any) => ({
           Id: a.Id ?? a.id,
           NombreArea: a.NombreArea ?? a.nombreArea ?? a.nombre,
@@ -110,6 +115,7 @@ export function CategoriesManagement() {
         setCategorias((Array.isArray(catsData) ? catsData : []).map((c: any) => ({
           Id: c.Id ?? c.id,
           AreaId: c.AreaId ?? c.areaId ?? c.area_id ?? 0,
+          TipoTicketId: c.TipoTicketId ?? c.tipoTicketId ?? c.tipo_ticket_id ?? 0,
           Nombre:
             c.Nombre ??
             c.nombre ??
@@ -138,19 +144,20 @@ export function CategoriesManagement() {
       setEditingItem(item)
       setFormData({
         AreaId: item.AreaId,
+        TipoTicketId: item.TipoTicketId,
         Nombre: item.Nombre,
         Descripcion: item.Descripcion,
         Estado: item.Estado,
       })
     } else {
       setEditingItem(null)
-      setFormData({ AreaId: 0, Nombre: '', Descripcion: '', Estado: true })
+      setFormData({ AreaId: 0, TipoTicketId: 0, Nombre: '', Descripcion: '', Estado: true })
     }
     setTimeout(() => setDialogOpen(true), 0)
   }
 
   const handleSave = async () => {
-    if (!formData.AreaId || formData.Nombre.length < 2 || formData.Descripcion.length < 2) {
+    if (!formData.AreaId || !formData.TipoTicketId || formData.Nombre.length < 2 || formData.Descripcion.length < 2) {
       toast.error('Complete los campos obligatorios (mínimo 2 caracteres)')
       return
     }
@@ -159,6 +166,7 @@ export function CategoriesManagement() {
       try {
         await actualizarCategoria(editingItem.Id, {
           AreaId: formData.AreaId,
+          TipoTicketId: formData.TipoTicketId,
           Nombre: formData.Nombre,
           Descripcion: formData.Descripcion,
           Estado: formData.Estado,
@@ -177,6 +185,7 @@ export function CategoriesManagement() {
       try {
         const created = await crearCategoria({
           AreaId: formData.AreaId,
+          TipoTicketId: formData.TipoTicketId,
           Nombre: formData.Nombre,
           Descripcion: formData.Descripcion,
           Estado: formData.Estado,
@@ -200,11 +209,12 @@ export function CategoriesManagement() {
     try {
       await eliminarCategoria(id)
       const fresh = await listarCategorias()
-      setCategorias(
-        (Array.isArray(fresh) ? fresh : []).map((c: any) => ({
-          Id: c.Id ?? c.id,
-          AreaId: c.AreaId ?? c.areaId ?? c.area_id ?? 0,
-          Nombre:
+        setCategorias(
+          (Array.isArray(fresh) ? fresh : []).map((c: any) => ({
+            Id: c.Id ?? c.id,
+            AreaId: c.AreaId ?? c.areaId ?? c.area_id ?? 0,
+            TipoTicketId: c.TipoTicketId ?? c.tipoTicketId ?? c.tipo_ticket_id ?? 0,
+            Nombre:
             c.Nombre ??
             c.nombre ??
             c.NombreCategoria ??
@@ -229,6 +239,7 @@ export function CategoriesManagement() {
     try {
       await actualizarCategoria(id, {
         AreaId: current.AreaId,
+        TipoTicketId: current.TipoTicketId,
         Nombre: current.Nombre,
         Descripcion: current.Descripcion,
         Estado: !current.Estado,
@@ -242,6 +253,10 @@ export function CategoriesManagement() {
 
   const getAreaName = (areaId: number) => {
     return areas.find(a => a.Id === areaId)?.NombreArea || 'Sin área'
+  }
+
+  const getTipoName = (tipoId: number) => {
+    return tipoTickets.find(t => t.Id === tipoId)?.Nombre || 'Sin tipo'
   }
 
   return (
@@ -286,6 +301,26 @@ export function CategoriesManagement() {
                     {areas.filter(a => a.Estado).map((area) => (
                       <SelectItem key={area.Id} value={area.Id.toString()}>
                         {area.NombreArea}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="tipo">Tipo de ticket *</Label>
+                <Select
+                  value={formData.TipoTicketId.toString() || ''}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, TipoTicketId: parseInt(value) })
+                  }
+                >
+                  <SelectTrigger id="tipo">
+                    <SelectValue placeholder="Seleccionar" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {tipoTickets.map((tipo) => (
+                      <SelectItem key={tipo.Id} value={tipo.Id.toString()}>
+                        {tipo.Nombre}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -355,6 +390,7 @@ export function CategoriesManagement() {
                   </div>
                   <div className="mt-1 space-y-0.5 text-sm text-muted-foreground">
                     <p className="min-w-0 break-words">{getAreaName(cat.AreaId)}</p>
+                    <p className="min-w-0 break-words">{getTipoName(cat.TipoTicketId)}</p>
                     {cat.Descripcion ? (
                       <p className="min-w-0 break-words">{cat.Descripcion}</p>
                     ) : null}
@@ -393,8 +429,9 @@ export function CategoriesManagement() {
             <Table className="table-fixed">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[28%]">Área</TableHead>
-                  <TableHead className="w-[26%]">Nombre</TableHead>
+                  <TableHead className="w-[22%]">Área</TableHead>
+                  <TableHead className="w-[18%]">Tipo</TableHead>
+                  <TableHead className="w-[22%]">Nombre</TableHead>
                   <TableHead className="hidden md:table-cell">Descripción</TableHead>
                   <TableHead className="w-[14%]">Estado</TableHead>
                   <TableHead className="w-12"></TableHead>
@@ -405,6 +442,9 @@ export function CategoriesManagement() {
                   <TableRow key={cat.Id}>
                     <TableCell className="text-muted-foreground">
                       <span className="break-words whitespace-normal">{getAreaName(cat.AreaId)}</span>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      <span className="break-words whitespace-normal">{getTipoName(cat.TipoTicketId)}</span>
                     </TableCell>
                     <TableCell className="font-medium break-words whitespace-normal">
                       {cat.Nombre}

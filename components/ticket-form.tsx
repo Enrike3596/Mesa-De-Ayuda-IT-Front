@@ -23,10 +23,11 @@ import { listarCategorias } from '@/lib/api/categoriaService'
 import { listarSubcategorias } from '@/lib/api/subcategoriaService'
 import { listarPrioridades } from '@/lib/api/prioridadService'
 import { listarAreas } from '@/lib/api/areaService'
+import { listarTipoTickets } from '@/lib/api/tipoTicketService'
 import { obtenerUsuariosPorArea } from '@/lib/api/usuarioService'
 import type { UsuarioResponse } from '@/lib/api/usuarioService'
 
-import type { Categoria, Subcategoria, CreateTicketForm, Prioridad, Area } from '@/lib/types'
+import type { Categoria, Subcategoria, CreateTicketForm, Prioridad, Area, TipoTicketInfo } from '@/lib/types'
 import Link from 'next/link'
 import { validarArchivo, EXTENSIONES_PERMITIDAS, MAX_FILE_SIZE } from '@/lib/api/anexoService'
 
@@ -36,6 +37,7 @@ export function TicketForm() {
   const { addNotification } = useNotifications()
   const [loading, setLoading] = useState(false)
   const [loadingCatalog, setLoadingCatalog] = useState(true)
+  const [tipoTickets, setTipoTickets] = useState<TipoTicketInfo[]>([])
   const [categorias, setCategorias] = useState<Categoria[]>([])
   const [subcategorias, setSubcategorias] = useState<Subcategoria[]>([])
   const [prioridades, setPrioridades] = useState<Prioridad[]>([])
@@ -73,6 +75,7 @@ export function TicketForm() {
   const [form, setForm] = useState<CreateTicketForm>({
     titulo: '',
     descripcion: '',
+    tipo_ticket_id: 0,
     categoria_id: 0,
     subcategoria_id: null,
     prioridad_id: 0,
@@ -85,14 +88,16 @@ export function TicketForm() {
 
     const load = async () => {
       try {
-      const [cats, subs, prios, areasData] = await Promise.all([listarCategorias(), listarSubcategorias(), listarPrioridades(), listarAreas()])
+      const [tipos, cats, subs, prios, areasData] = await Promise.all([listarTipoTickets(), listarCategorias(), listarSubcategorias(), listarPrioridades(), listarAreas()])
       if (!mounted) return
+      setTipoTickets(Array.isArray(tipos) ? tipos : [])
       setCategorias(Array.isArray(cats) ? cats : [])
       setSubcategorias(Array.isArray(subs) ? subs : [])
       setPrioridades(Array.isArray(prios) ? prios : [])
       setAreas(Array.isArray(areasData) ? areasData : [])
       } catch {
         if (!mounted) return
+        setTipoTickets([])
         setCategorias([])
         setSubcategorias([])
         setPrioridades([])
@@ -138,7 +143,7 @@ export function TicketForm() {
     
     const userId = session.user?.id;
 
-    if (!form.titulo || !form.descripcion || !form.categoria_id || !form.prioridad_id || !form.area_id || !userId) {
+    if (!form.titulo || !form.descripcion || !form.tipo_ticket_id || !form.categoria_id || !form.prioridad_id || !form.area_id || !userId) {
       toast.error('Información incompleta', {
         description: !userId ? 'No se pudo identificar al usuario. Reintente loguear.' : 'Por favor complete todos los campos obligatorios.'
       })
@@ -242,6 +247,30 @@ export function TicketForm() {
               />
             </div>
 
+            {/* Tipo de Ticket */}
+            <div className="space-y-2">
+              <Label htmlFor="tipo_ticket">Tipo de ticket *</Label>
+              <Select
+                value={form.tipo_ticket_id.toString() || ''}
+                onValueChange={(value) => {
+                  const tipoId = parseInt(value)
+                  setForm(prev => ({ ...prev, tipo_ticket_id: tipoId, categoria_id: 0, subcategoria_id: null }))
+                }}
+                disabled={loading || loadingCatalog || tipoTickets.length === 0}
+              >
+                <SelectTrigger id="tipo_ticket">
+                  <SelectValue placeholder="Seleccione tipo de ticket" />
+                </SelectTrigger>
+                <SelectContent>
+                  {tipoTickets.map((tipo) => (
+                    <SelectItem key={tipo.Id} value={tipo.Id.toString()}>
+                      {tipo.Nombre}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             {/* Categoria, Subcategoria y Prioridad */}
             {/* Avoid cramped selects inside dialogs: 2 cols on sm, 3 cols only on lg+ */}
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -259,13 +288,13 @@ export function TicketForm() {
                       setForm(prev => ({ ...prev, categoria_id: catId, subcategoria_id: null }))
                      }
                    }}
-                  disabled={loading || loadingCatalog || categorias.length === 0}
+                  disabled={loading || loadingCatalog || !form.tipo_ticket_id || categorias.filter(c => c.Estado && c.TipoTicketId === form.tipo_ticket_id).length === 0}
                 >
                   <SelectTrigger id="categoria">
                     <SelectValue placeholder="Seleccione una categoría" />
                   </SelectTrigger>
                   <SelectContent>
-                    {categorias.filter(c => c.Estado).map((cat) => (
+                    {categorias.filter(c => c.Estado && c.TipoTicketId === form.tipo_ticket_id).map((cat) => (
                       <SelectItem key={cat.Id} value={cat.Id.toString()}>
                         {cat.Nombre}
                       </SelectItem>

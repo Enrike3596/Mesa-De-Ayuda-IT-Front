@@ -44,6 +44,7 @@ import { obtenerUsuarios, type UsuarioResponse } from '@/lib/api/usuarioService'
 import { listarCategorias } from '@/lib/api/categoriaService'
 import { listarSubcategorias } from '@/lib/api/subcategoriaService'
 import { listarPrioridades } from '@/lib/api/prioridadService'
+import { listarTipoTickets } from '@/lib/api/tipoTicketService'
 import { obtenerAsignadosPorTicket, obtenerComentariosPorTicket, obtenerSlaPorTicket } from '@/lib/api/ticketService'
 import { isTicketVencido, corregirSlaInfoResuelto } from '@/lib/utils'
 import type { Ticket, TicketAsignado, TicketComentario, TicketEstado, TkAnexo, UpdateTicketForm, TicketSlaInfo, SolicitudCierrePayload, ConfirmacionCierrePayload } from '@/lib/types'
@@ -82,9 +83,11 @@ export function TicketDetail({ ticketId }: TicketDetailProps) {
   const [agents, setAgents] = useState<UsuarioResponse[]>([])
   const [pendingStatus, setPendingStatus] = useState<TicketEstado | ''>('')
   const [catalogUsers, setCatalogUsers] = useState<UsuarioResponse[]>([])
+  const [catalogTipoTickets, setCatalogTipoTickets] = useState<any[]>([])
   const [catalogCategorias, setCatalogCategorias] = useState<any[]>([])
   const [catalogSubcategorias, setCatalogSubcategorias] = useState<any[]>([])
   const [catalogPrioridades, setCatalogPrioridades] = useState<any[]>([])
+  const [selectedTipo, setSelectedTipo] = useState<string>('')
   const [selectedCategoria, setSelectedCategoria] = useState<string>('')
   const [selectedSubcategoria, setSelectedSubcategoria] = useState<string>('')
   const [fallbackComentarios, setFallbackComentarios] = useState<TicketComentario[]>([])
@@ -102,6 +105,7 @@ export function TicketDetail({ ticketId }: TicketDetailProps) {
     const found = tickets.find(t => t.id === ticketId)
     setTicket(found)
     setPendingStatus(found?.estado || '')
+    setSelectedTipo(found?.tipo_ticket_id?.toString() || '')
     setSelectedCategoria(found?.categoria_id?.toString() || '')
     setSelectedSubcategoria(found?.subcategoria_id?.toString() || '')
   }, [tickets, ticketId])
@@ -132,8 +136,9 @@ export function TicketDetail({ ticketId }: TicketDetailProps) {
 
     const loadCatalogData = async () => {
       try {
-      const [usersData, categoriasData, subcategoriasData, prioridadesData] = await Promise.all([
+      const [usersData, tiposData, categoriasData, subcategoriasData, prioridadesData] = await Promise.all([
         obtenerUsuarios(),
+        listarTipoTickets(),
         listarCategorias(),
         listarSubcategorias(),
         listarPrioridades(),
@@ -141,12 +146,14 @@ export function TicketDetail({ ticketId }: TicketDetailProps) {
 
       if (!mounted) return
       setCatalogUsers(Array.isArray(usersData) ? usersData : [])
+      setCatalogTipoTickets(Array.isArray(tiposData) ? tiposData : [])
       setCatalogCategorias(Array.isArray(categoriasData) ? categoriasData : [])
       setCatalogSubcategorias(Array.isArray(subcategoriasData) ? subcategoriasData : [])
       setCatalogPrioridades(Array.isArray(prioridadesData) ? prioridadesData : [])
       } catch {
         if (!mounted) return
         setCatalogUsers([])
+        setCatalogTipoTickets([])
         setCatalogCategorias([])
         setCatalogSubcategorias([])
         setCatalogPrioridades([])
@@ -309,6 +316,15 @@ export function TicketDetail({ ticketId }: TicketDetailProps) {
     })
   }, [agents])
 
+  const filteredCategoriasByTipo = useMemo(() => {
+    const tipoId = Number.parseInt(selectedTipo, 10)
+    if (!tipoId || !catalogCategorias.length) return []
+    return catalogCategorias.filter((c) => {
+      const cTipoId = c.TipoTicketId ?? c.tipoTicketId ?? c.tipo_ticket_id
+      return cTipoId === tipoId
+    })
+  }, [selectedTipo, catalogCategorias])
+
   const filteredSubcategorias = useMemo(() => {
     const catId = Number.parseInt(selectedCategoria, 10)
     if (!catId || !catalogSubcategorias.length) return []
@@ -354,6 +370,7 @@ export function TicketDetail({ ticketId }: TicketDetailProps) {
     const estadoCambio = pendingStatus && pendingStatus !== ticket.estado
     const comentarioTexto = comment.trim()
     const esCierreAgente = estadoCambio && pendingStatus === 'CERRADO' && canManageTicket
+    const tipoCambio = selectedTipo && Number.parseInt(selectedTipo, 10) !== ticket.tipo_ticket_id
     const categoriaCambio = selectedCategoria && Number.parseInt(selectedCategoria, 10) !== ticket.categoria_id
     const subcategoriaCambio = selectedSubcategoria && Number.parseInt(selectedSubcategoria, 10) !== ticket.subcategoria_id
 
@@ -362,7 +379,7 @@ export function TicketDetail({ ticketId }: TicketDetailProps) {
       return
     }
 
-    if (!estadoCambio && !selectedAgent && !comentarioTexto && !categoriaCambio && !subcategoriaCambio) {
+    if (!estadoCambio && !selectedAgent && !comentarioTexto && !tipoCambio && !categoriaCambio && !subcategoriaCambio) {
       toast.error('No hay cambios para guardar')
       return
     }
@@ -396,6 +413,7 @@ export function TicketDetail({ ticketId }: TicketDetailProps) {
 
       const needsTicketUpdate =
         (!solicitarCierre && estadoCambio) ||
+        tipoCambio ||
         categoriaCambio ||
         subcategoriaCambio
 
@@ -407,6 +425,7 @@ export function TicketDetail({ ticketId }: TicketDetailProps) {
           area_id: ticket.area_id,
         }
         if (estadoCambio) updates.estado = pendingStatus as TicketEstado
+        if (tipoCambio) updates.tipo_ticket_id = Number.parseInt(selectedTipo, 10)
         if (categoriaCambio) updates.categoria_id = Number.parseInt(selectedCategoria, 10)
         if (subcategoriaCambio) updates.subcategoria_id = Number.parseInt(selectedSubcategoria, 10)
         await ticketsStore.updateTicket(ticket.id, updates)
@@ -957,6 +976,44 @@ export function TicketDetail({ ticketId }: TicketDetailProps) {
               <div className="flex items-start gap-3">
                 <Tag className="h-4 w-4 text-muted-foreground mt-0.5" />
                 <div className="flex-1">
+                  <p className="text-xs text-muted-foreground">Tipo</p>
+                  {canManageTicket && ticket.estado !== 'CERRADO' ? (
+                    <Select
+                      value={selectedTipo}
+                      onValueChange={(val) => {
+                        setSelectedTipo(val)
+                        setSelectedCategoria('')
+                        setSelectedSubcategoria('')
+                      }}
+                    >
+                      <SelectTrigger className="mt-1 h-8 text-sm">
+                        <SelectValue placeholder="Seleccionar tipo" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {catalogTipoTickets.map((tipo) => {
+                          const tipoId = (tipo.Id ?? tipo.id ?? 0).toString()
+                          const tipoName = tipo.Nombre ?? tipo.nombre ?? ''
+                          return (
+                            <SelectItem key={tipoId} value={tipoId}>
+                              {tipoName}
+                            </SelectItem>
+                          )
+                        })}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <p className="font-medium">
+                      {catalogTipoTickets.find((t) => (t.Id ?? t.id) === ticket.tipo_ticket_id)?.Nombre ||
+                       catalogTipoTickets.find((t) => (t.Id ?? t.id) === ticket.tipo_ticket_id)?.nombre ||
+                       'N/A'}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <Tag className="h-4 w-4 text-muted-foreground mt-0.5" />
+                <div className="flex-1">
                   <p className="text-xs text-muted-foreground">Categoría</p>
                   {canManageTicket && ticket.estado !== 'CERRADO' ? (
                     <Select
@@ -965,12 +1022,13 @@ export function TicketDetail({ ticketId }: TicketDetailProps) {
                         setSelectedCategoria(val)
                         setSelectedSubcategoria('')
                       }}
+                      disabled={!selectedTipo}
                     >
                       <SelectTrigger className="mt-1 h-8 text-sm">
-                        <SelectValue placeholder="Seleccionar categoría" />
+                        <SelectValue placeholder={selectedTipo ? 'Seleccionar categoría' : 'Seleccione tipo primero'} />
                       </SelectTrigger>
                       <SelectContent>
-                        {catalogCategorias.map((cat) => {
+                        {filteredCategoriasByTipo.map((cat) => {
                           const catId = (cat.Id ?? cat.id ?? 0).toString()
                           const catName = cat.Nombre ?? cat.nombre ?? ''
                           return (

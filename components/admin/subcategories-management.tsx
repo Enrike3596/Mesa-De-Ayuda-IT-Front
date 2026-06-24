@@ -95,6 +95,7 @@ export function SubcategoriesManagement() {
         setCategorias((Array.isArray(catsData) ? catsData : []).map((c: any) => ({
           Id: c.Id ?? c.id,
           AreaId: c.AreaId ?? c.areaId ?? c.area_id ?? 0,
+          TipoTicketId: c.TipoTicketId ?? c.tipoTicketId ?? c.tipo_ticket_id ?? 0,
           Nombre: c.Nombre ?? c.nombre ?? c.NombreCategoria ?? c.nombreCategoria ?? '',
           Descripcion: c.Descripcion ?? c.descripcion ?? '',
           Estado: normalizeEstadoToBoolean(c?.Estado ?? c?.estado),

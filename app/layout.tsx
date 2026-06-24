@@ -37,12 +37,12 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <AuthProvider>
-            <SignalRProvider>
-              <NotificationsProvider>
+            <NotificationsProvider>
+              <SignalRProvider>
                 {children}
                 <Toaster position="top-right" richColors />
-              </NotificationsProvider>
-            </SignalRProvider>
+              </SignalRProvider>
+            </NotificationsProvider>
           </AuthProvider>
         </ThemeProvider>
         {process.env.NODE_ENV === 'production' && <Analytics />}

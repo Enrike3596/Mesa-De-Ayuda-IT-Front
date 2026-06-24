@@ -75,6 +75,14 @@ export function normalizeTicket(raw: any): Ticket {
 
 	const area_id = raw?.area_id ?? raw?.AreaId ?? raw?.areaId ?? raw?.areaid ?? 0
 
+	const tipo_ticket_id =
+		raw?.tipo_ticket_id ??
+		raw?.TipoTicketId ??
+		raw?.tipoTicketId ??
+		raw?.tktipoticket_id ??
+		raw?.TkTipoTicketId ??
+		0
+
 	const estadoRaw = raw?.estado ?? raw?.Estado ?? raw?.estadoTicket ?? raw?.EstadoTicket
 	const estadoNormalized =
 		typeof estadoRaw === 'string'
@@ -107,6 +115,7 @@ export function normalizeTicket(raw: any): Ticket {
 		subcategoria_id: subcategoria_id || null,
 		prioridad_id,
 		area_id,
+		tipo_ticket_id: tipo_ticket_id || undefined,
 
 		created_at: raw?.created_at ?? raw?.FechaCreacion ?? raw?.fechaCreacion ?? raw?.createdAt ?? '',
 		updated_at: raw?.updated_at ?? raw?.FechaModificacion ?? raw?.updatedAt ?? raw?.FechaModificacion ?? '',
@@ -166,6 +175,7 @@ function toTicketCreatePayload(dto: CreateTicketForm): Record<string, unknown> {
 		SubcategoriaId: dto.subcategoria_id && dto.subcategoria_id > 0 ? dto.subcategoria_id : null,
 		PrioridadId: dto.prioridad_id,
 		AreaId: dto.area_id,
+		TipoTicketId: dto.tipo_ticket_id,
 	}
 }
 
@@ -202,6 +212,10 @@ function toTicketUpdatePayload(dto: UpdateTicketForm): Record<string, unknown> {
 	if (dto.area_id !== undefined) {
 		payload.area_id = dto.area_id
 		payload.AreaId = dto.area_id
+	}
+	if (dto.tipo_ticket_id !== undefined) {
+		payload.tipo_ticket_id = dto.tipo_ticket_id
+		payload.TipoTicketId = dto.tipo_ticket_id
 	}
 	return payload
 }
@@ -354,14 +368,14 @@ export async function asignarTicket(id: number, agenteId: number): Promise<Ticke
 	const existentes = await obtenerAsignadosPorTicket(id)
 	for (const existente of existentes) {
 		try {
-			await api.delete<any>(`/tkasignado/${existente.id}`)
+			await api.delete<any>(`/TicketAsignado/${existente.id}`)
 		} catch {
 			// Intenta con ruta alternativa
-			try { await api.delete<any>(`/tkasignado?id=${existente.id}`) } catch {}
+			try { await api.delete<any>(`/TicketAsignado?id=${existente.id}`) } catch {}
 		}
 	}
 
-	await api.post<any>('/tkasignado', {
+	await api.post<any>('/TicketAsignado', {
 		ticket_id: id,
 		TicketId: id,
 		agente_id: agenteId,
@@ -379,7 +393,7 @@ export async function agregarComentarioTicket(
 	id: number,
 	dto: CreateCommentForm
 ): Promise<Ticket> {
-	await api.post<any>('/tkcomentario', {
+	await api.post<any>('/TicketComentario', {
 		ticket_id: id,
 		TicketId: id,
 		comentario: dto.comentario,
@@ -394,19 +408,19 @@ export async function agregarComentarioTicket(
 }
 
 export async function obtenerAsignadosPorTicket(ticketId: number): Promise<TicketAsignado[]> {
-	const response = await api.get<any>('/tkasignado')
+	const response = await api.get<any>('/TicketAsignado')
 	const data = Array.isArray(response.data) ? response.data : []
 	return data.map(normalizeAsignado).filter((a) => a.ticket_id === ticketId)
 }
 
 export async function obtenerAsignados(): Promise<TicketAsignado[]> {
-	const response = await api.get<any>('/tkasignado')
+	const response = await api.get<any>('/TicketAsignado')
 	const data = Array.isArray(response.data) ? response.data : []
 	return data.map(normalizeAsignado)
 }
 
 export async function obtenerComentariosPorTicket(ticketId: number): Promise<TicketComentario[]> {
-	const response = await api.get<any>('/tkcomentario')
+	const response = await api.get<any>('/TicketComentario')
 	const data = Array.isArray(response.data) ? response.data : []
 	return data.map(normalizeComentario).filter((c) => c.ticket_id === ticketId)
 }

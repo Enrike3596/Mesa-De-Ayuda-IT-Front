@@ -27,6 +27,7 @@ function normalizeCategoria(raw: any): Categoria {
   return {
     Id: raw?.Id ?? raw?.id ?? 0,
     AreaId: raw?.AreaId ?? raw?.areaId ?? raw?.area_id ?? 0,
+    TipoTicketId: raw?.TipoTicketId ?? raw?.tipoTicketId ?? raw?.tipo_ticket_id ?? 0,
     Nombre:
       raw?.Nombre ??
       raw?.nombre ??
@@ -65,6 +66,7 @@ function toCategoriaApiPayload(input: Partial<CategoriaUpsertInput>) {
     Nombre: raw?.Nombre ?? raw?.NombreCategoria ?? raw?.nombre ?? raw?.nombreCategoria,
     Descripcion: raw?.Descripcion ?? raw?.descripcion,
     AreaId: raw?.AreaId ?? raw?.areaId ?? raw?.area_id,
+    TipoTicketId: raw?.TipoTicketId ?? raw?.tipoTicketId ?? raw?.tipo_ticket_id,
     Estado: estadoValue,
   }
 }
