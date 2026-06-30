@@ -191,7 +191,7 @@ export function TicketDetail({ ticketId }: TicketDetailProps) {
     return () => {
       mounted = false
     }
-  }, [ticketId, ticket?.asignado?.agente_id, ticket?.comentarios?.length])
+  }, [ticketId, ticket])
 
   const maxSizeMB = MAX_FILE_SIZE / (1024 * 1024)
 
