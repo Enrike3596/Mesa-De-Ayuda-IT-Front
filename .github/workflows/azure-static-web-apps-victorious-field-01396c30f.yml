@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     env:
-      VITE_API_URL: https://mesa-ti-gqc2f5fpftaxh0bs.eastus2-01.azurewebsites.net
+      NEXT_PUBLIC_API_URL: https://mesa-ti-gqc2f5fpftaxh0bs.eastus2-01.azurewebsites.net/api
     steps:
       - uses: actions/checkout@v3
         with:
