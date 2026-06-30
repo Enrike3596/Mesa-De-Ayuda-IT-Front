@@ -45,7 +45,7 @@ import { listarCategorias } from '@/lib/api/categoriaService'
 import { listarSubcategorias } from '@/lib/api/subcategoriaService'
 import { listarPrioridades } from '@/lib/api/prioridadService'
 import { listarTipoTickets } from '@/lib/api/tipoTicketService'
-import { obtenerAsignadosPorTicket, obtenerComentariosPorTicket, obtenerSlaPorTicket } from '@/lib/api/ticketService'
+import { obtenerTicketPorId, obtenerAsignadosPorTicket, obtenerComentariosPorTicket, obtenerSlaPorTicket } from '@/lib/api/ticketService'
 import { isTicketVencido, corregirSlaInfoResuelto } from '@/lib/utils'
 import type { Ticket, TicketAsignado, TicketComentario, TicketEstado, TkAnexo, UpdateTicketForm, TicketSlaInfo, SolicitudCierrePayload, ConfirmacionCierrePayload } from '@/lib/types'
 import { listarAnexosPorTicket, isImageFile, formatFileSize, getUrlArchivoCompleto } from '@/lib/api/anexoService'
@@ -102,12 +102,21 @@ export function TicketDetail({ ticketId }: TicketDetailProps) {
   const [motivoRechazo, setMotivoRechazo] = useState('')
 
   useEffect(() => {
+    let mounted = true
     const found = tickets.find(t => t.id === ticketId)
     setTicket(found)
     setPendingStatus(found?.estado || '')
     setSelectedTipo(found?.tipo_ticket_id?.toString() || '')
     setSelectedCategoria(found?.categoria_id?.toString() || '')
     setSelectedSubcategoria(found?.subcategoria_id?.toString() || '')
+
+    if (!found?.asignado) {
+      obtenerTicketPorId(ticketId).then(detalle => {
+        if (!mounted) return
+        setTicket(prev => prev ? { ...prev, ...detalle } : detalle)
+      }).catch(() => {})
+    }
+    return () => { mounted = false }
   }, [tickets, ticketId])
 
   useEffect(() => {
@@ -182,7 +191,6 @@ export function TicketDetail({ ticketId }: TicketDetailProps) {
         setAnexos(anexosData)
       } catch {
         if (!mounted) return
-        setFallbackAsignado(undefined)
         setFallbackComentarios([])
       }
     }
