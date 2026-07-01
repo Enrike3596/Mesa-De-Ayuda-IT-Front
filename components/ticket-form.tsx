@@ -271,6 +271,87 @@ export function TicketForm() {
               </Select>
             </div>
 
+            {/* Info de tipo de ticket */}
+            {form.tipo_ticket_id > 0 ? (
+              <div className="rounded-lg border border-purple-200 bg-purple-50 p-4 dark:border-purple-800 dark:bg-purple-950/30">
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5 shrink-0 rounded-full bg-purple-100 p-1.5 dark:bg-purple-900/50">
+                    <span className="text-sm font-bold text-purple-700 dark:text-purple-300">
+                      {tipoTickets.find(t => t.Id === form.tipo_ticket_id)?.Nombre?.charAt(0) ?? '?'}
+                    </span>
+                  </div>
+                  <div className="space-y-2 text-sm">
+                    <p className="font-medium text-purple-800 dark:text-purple-200">
+                      {tipoTickets.find(t => t.Id === form.tipo_ticket_id)?.Nombre === 'Incidente'
+                        ? 'Has seleccionado un Incidente'
+                        : tipoTickets.find(t => t.Id === form.tipo_ticket_id)?.Nombre === 'Requerimiento'
+                          ? 'Has seleccionado un Requerimiento'
+                          : `Tipo seleccionado: ${tipoTickets.find(t => t.Id === form.tipo_ticket_id)?.Nombre ?? ''}`
+                      }
+                    </p>
+                    <p className="text-muted-foreground">
+                      {tipoTickets.find(t => t.Id === form.tipo_ticket_id)?.Nombre === 'Incidente'
+                        ? 'Reporta un problema o error que impide realizar una tarea. El equipo de soporte trabajará para restaurar el servicio lo antes posible.'
+                        : tipoTickets.find(t => t.Id === form.tipo_ticket_id)?.Nombre === 'Requerimiento'
+                          ? 'Solicita una nueva funcionalidad, cambio o mejora. El equipo evaluará la viabilidad y planificará su implementación.'
+                          : 'Selecciona las categorías que mejor describan tu solicitud para una atención más rápida.'
+                      }
+                    </p>
+                    <ul className="space-y-1 text-muted-foreground">
+                      {tipoTickets.find(t => t.Id === form.tipo_ticket_id)?.Nombre === 'Incidente' && (
+                        <>
+                          <li className="flex items-center gap-2">
+                            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-red-500" />
+                            Ejemplos: Error en sistema, problema de red, fallo de hardware, acceso denegado
+                          </li>
+                          <li className="flex items-center gap-2">
+                            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-red-500" />
+                            Categorías comunes: Soporte técnico, Infraestructura, Seguridad
+                          </li>
+                        </>
+                      )}
+                      {tipoTickets.find(t => t.Id === form.tipo_ticket_id)?.Nombre === 'Requerimiento' && (
+                        <>
+                          <li className="flex items-center gap-2">
+                            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-blue-500" />
+                            Ejemplos: Nueva funcionalidad, actualización de software, permisos de acceso, mejora de proceso
+                          </li>
+                          <li className="flex items-center gap-2">
+                            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-blue-500" />
+                            Categorías comunes: Desarrollo, Mejora continua, Capacitación
+                          </li>
+                        </>
+                      )}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="rounded-lg border border-muted bg-muted/30 p-4">
+                <h4 className="mb-3 text-sm font-medium">¿Qué tipo de ticket necesitas?</h4>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-md border border-red-200 bg-red-50/50 p-3 dark:border-red-900 dark:bg-red-950/20">
+                    <div className="mb-1 flex items-center gap-2">
+                      <span className="h-2 w-2 rounded-full bg-red-500" />
+                      <span className="text-sm font-medium text-red-800 dark:text-red-300">Incidente</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Reporta un problema o error que afecta tu trabajo. Ej: sistema caído, error inesperado, fallo de red.
+                    </p>
+                  </div>
+                  <div className="rounded-md border border-blue-200 bg-blue-50/50 p-3 dark:border-blue-900 dark:bg-blue-950/20">
+                    <div className="mb-1 flex items-center gap-2">
+                      <span className="h-2 w-2 rounded-full bg-blue-500" />
+                      <span className="text-sm font-medium text-blue-800 dark:text-blue-300">Requerimiento</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Solicita algo nuevo o un cambio. Ej: nueva funcionalidad, permiso de acceso, actualización, mejora.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Categoria, Subcategoria y Prioridad */}
             {/* Avoid cramped selects inside dialogs: 2 cols on sm, 3 cols only on lg+ */}
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
